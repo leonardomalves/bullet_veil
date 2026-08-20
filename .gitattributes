@@ -1,0 +1,25 @@
+# Fim de linha normalizado no repositório: LF, sempre.
+#
+# Existe porque já mordeu: um script de edição em Python reescreveu quatro
+# arquivos em CRLF e o diff de 48 linhas virou 2.000. Sem isto, qualquer
+# ferramenta que rode no Windows pode repetir a dose.
+* text=auto eol=lf
+
+# Batch do Windows só funciona com CRLF.
+*.bat text eol=crlf
+
+# Binários: o git não deve tentar converter nada aqui dentro.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.wav binary
+*.glb binary
+*.gltf binary
+*.jar binary
+*.zip binary
+*.ttf binary
+*.otf binary
+*.keystore binary
+*.jks binary
