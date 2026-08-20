@@ -177,7 +177,6 @@ class DanmakuGame extends FlameGame {
   double _musicCd = 0; // cadência de atualização da camada de intensidade
 
   // Cadeia de medalhas
-  static const _medalSteps = [100, 200, 400, 700, 1000, 2000, 5000, 10000];
   int _medalIndex = 0;
 
   // Achievements dentro da partida
@@ -198,7 +197,7 @@ class DanmakuGame extends FlameGame {
               ? 2
               : 1;
 
-  int get _medalValue => _medalSteps[_medalIndex.clamp(0, _medalSteps.length - 1)];
+  int get _medalValue => kMedalSteps[_medalIndex.clamp(0, kMedalSteps.length - 1)];
 
   /// Naves extras por onda que a fúria manda para cima do jogador forte —
   /// o "quando estou com míssil, vem mais inimigo".
@@ -531,7 +530,7 @@ class DanmakuGame extends FlameGame {
     // O degrau atual dá o tom: a escada sonora é a corrente audível.
     sfx.medal(_medalIndex, pan: _pan(at.x));
     missions.track(MissionGoal.medals);
-    if (_medalIndex < _medalSteps.length - 1) _medalIndex++;
+    if (_medalIndex < kMedalSteps.length - 1) _medalIndex++;
     medalNotifier.value = _medalValue;
     sparks.burst(x: at.x, y: at.y, color: 5, count: 3, speed: 120, life: 0.25, scale: 0.5);
   }
@@ -568,8 +567,8 @@ class DanmakuGame extends FlameGame {
         _floating('1UP', player.position, const Color(0xFF4BF07A), 24);
       }
     }
-    if (s >= 50000) achievements.unlock(Achievement.score50k);
-    if (s >= 150000) achievements.unlock(Achievement.score150k);
+    if (s >= 15000) achievements.unlock(Achievement.score50k);
+    if (s >= 40000) achievements.unlock(Achievement.score150k);
   }
 
   // ── Colisão ────────────────────────────────────────────────────────────
@@ -581,7 +580,9 @@ class DanmakuGame extends FlameGame {
       );
       if (damage > 0) {
         enemy.damage(damage * _playerBulletDamage);
-        scoreNotifier.value += (damage * 2).round();
+        // Sem pontos por dano: o autofire é automático, então pagar por bala
+        // que encosta é pagar por nada — e era a maior fonte de inflação do
+        // placar. O abate paga; a faísca abaixo é o feedback do acerto.
         if (_rng.nextDouble() < 0.5) {
           sparks.burst(
             x: enemy.position.x + (_rng.nextDouble() - 0.5) * enemy.radius,

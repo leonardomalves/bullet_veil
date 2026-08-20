@@ -69,7 +69,7 @@ void main() {
 
   test('créditos por pontuação', () {
     expect(Garage.creditsFor(0), 0);
-    expect(Garage.creditsFor(4000), 100);
-    expect(Garage.creditsFor(80000), 2000);
+    expect(Garage.creditsFor(4000), 200);
+    expect(Garage.creditsFor(80000), 4000);
   });
 }

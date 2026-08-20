@@ -45,7 +45,17 @@ const int kMaxBombs = 5;
 
 /// Marco de pontuação para ganhar uma nave. Baixo de propósito: o jogador
 /// precisa sentir que ganha vida DURANTE a luta, não só num número distante.
-const int kOneUpEvery = 18000;
+const int kOneUpEvery = 4500;
+
+/// Escada da cadeia de medalhas: o valor sobe a cada coleta em sequência e
+/// zera se uma cair. São OITO degraus porque a escada sonora tem oito amostras
+/// (`medal_1..medal_8`) — mexer no tamanho aqui exige mexer no áudio.
+///
+/// O topo é deliberadamente modesto: o valor ainda é multiplicado pela cadeia
+/// (até ×4) e pela dificuldade (até ×2), então 2500 no topo já vale 20 mil por
+/// medalha no LENDA. Com o topo antigo de 10 mil, a colheita de um chefe (14
+/// medalhas) sozinha valia mais de um milhão, e era o que estourava o placar.
+const List<int> kMedalSteps = [50, 100, 200, 350, 600, 1000, 1600, 2500];
 
 /// Versão do cliente carimbada nos replays (manter em dia com o pubspec).
 const String kClientVersion = '1.4.1+2006';

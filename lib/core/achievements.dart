@@ -15,8 +15,11 @@ enum Achievement {
   graze100('Dança das Balas', 'Roce 100 balas numa partida', 400),
   fury('Fúria Encarnada', 'Encha o medidor de fúria', 350),
   allWeapons('Tríade', 'Use as três armas numa partida', 250),
-  score50k('Ás', 'Faça 50 mil pontos', 400),
-  score150k('Lenda Viva', 'Faça 150 mil pontos', 800),
+  // Os identificadores continuam score50k/score150k porque são a CHAVE de
+  // persistência (`ach_<name>`): renomear apagaria conquistas já ganhas. Os
+  // limiares desceram com a escala nova do placar.
+  score50k('Ás', 'Faça 15 mil pontos', 400),
+  score150k('Lenda Viva', 'Faça 40 mil pontos', 800),
   noMissBoss('Intocável', 'Derrote um chefe sem levar dano', 600);
 
   const Achievement(this.title, this.description, this.reward);

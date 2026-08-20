@@ -2,6 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flame_test/flame_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bullet_veil/core/high_scores.dart';
+import 'package:bullet_veil/game/arena.dart';
 import 'package:bullet_veil/game/atlas.dart';
 import 'package:bullet_veil/game/bullet_field.dart';
 import 'package:bullet_veil/game/danmaku_game.dart';
@@ -200,16 +201,19 @@ void main() {
         }
         expect(game.multiplier, 2);
 
-        // 1ª medalha vale o degrau inicial (100) × multiplicador (2).
+        // 1ª medalha vale o degrau inicial × multiplicador (2). Os valores
+        // saem de kMedalSteps para o teste sobreviver a recalibragem: o que
+        // importa é a REGRA, não o número da vez.
         var before = game.scoreNotifier.value;
         game.collectGem(0, at());
-        expect(game.scoreNotifier.value - before, 100 * 2);
-        expect(game.medalNotifier.value, 200, reason: 'degrau deve subir');
+        expect(game.scoreNotifier.value - before, kMedalSteps[0] * 2);
+        expect(game.medalNotifier.value, kMedalSteps[1],
+            reason: 'degrau deve subir');
 
-        // 2ª medalha já vale o degrau novo (200).
+        // 2ª medalha já vale o degrau novo.
         before = game.scoreNotifier.value;
         game.collectGem(0, at());
-        expect(game.scoreNotifier.value - before, 200 * 2);
+        expect(game.scoreNotifier.value - before, kMedalSteps[1] * 2);
       },
     );
 
@@ -217,9 +221,9 @@ void main() {
       'deixar a medalha cair zera o degrau',
       build,
       (game) async {
-        game.collectGem(0, at()); // sobe para 200
-        game.collectGem(0, at()); // sobe para 400
-        expect(game.medalNotifier.value, greaterThan(100));
+        game.collectGem(0, at()); // sobe um degrau
+        game.collectGem(0, at()); // e mais um
+        expect(game.medalNotifier.value, greaterThan(kMedalSteps[0]));
         game.onGemMissed();
         expect(game.medalNotifier.value, 0,
             reason: 'perder reseta o degrau e esconde o chip do HUD');

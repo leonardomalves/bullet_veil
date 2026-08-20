@@ -269,7 +269,13 @@ class Garage extends ChangeNotifier {
   }
 
   /// Créditos ganhos numa partida a partir da pontuação.
-  static int creditsFor(int score) => (score / 40).round();
+  ///
+  /// O divisor acompanha a escala do placar. A queda NÃO foi uniforme: medida
+  /// em partida simulada, a pontuação caiu 38% no PILOTO e 21% no LENDA, e a
+  /// colheita de medalha de um chefe caiu 4× (1,12M → 280k). O 40 antigo virou
+  /// 20 para o ganho por partida ficar perto do que era — senão o hangar
+  /// viraria moagem. Vale reconferir depois de algumas partidas de verdade.
+  static int creditsFor(int score) => (score / 20).round();
 }
 
 final garage = Garage.instance;
