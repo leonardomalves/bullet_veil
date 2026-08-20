@@ -9,6 +9,7 @@ import 'arena.dart';
 import 'atlas.dart';
 import 'bullet_field.dart';
 import 'danmaku_game.dart';
+import 'sprites.dart';
 
 /// As três armas especiais, estilo Raiden. Cada uma tem um contrato claro:
 /// Vulcan cobre área, Laser fura fila (perfurante, dano alto num corredor),
@@ -359,41 +360,40 @@ class Player extends PositionComponent with HasGameReference<DanmakuGame> {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
     );
 
-    final hull = Path()
-      ..moveTo(0, -30)
-      ..lineTo(15, 12)
-      ..lineTo(6, 18)
-      ..lineTo(-6, 18)
-      ..lineTo(-15, 12)
-      ..close();
-    canvas.drawPath(
-      hull,
-      Paint()..color = skin.hull.withValues(alpha: blink),
-    );
-    // Contorno na cor de destaque da skin.
-    canvas.drawPath(
-      hull,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
-        ..color = skin.accent.withValues(alpha: blink),
-    );
-    canvas.drawPath(
-      Path()
-        ..moveTo(-15, 12)
-        ..lineTo(-25, 2)
-        ..lineTo(-16, 4)
-        ..close(),
-      Paint()..color = skin.wing.withValues(alpha: blink),
-    );
-    canvas.drawPath(
-      Path()
-        ..moveTo(15, 12)
-        ..lineTo(25, 2)
-        ..lineTo(16, 4)
-        ..close(),
-      Paint()..color = skin.wing.withValues(alpha: blink),
-    );
+    // Casco: modelo 3D pre-renderizado por skin. Sem a folha no bundle, o
+    // desenho vetorial de sempre assume — mesmo contrato do audio e dos ads.
+    if (!sprites.draw(canvas, 'player_${skin.name}',
+        size: 64, opacity: blink)) {
+      final hull = Path()
+        ..moveTo(0, -30)
+        ..lineTo(15, 12)
+        ..lineTo(6, 18)
+        ..lineTo(-6, 18)
+        ..lineTo(-15, 12)
+        ..close();
+      canvas.drawPath(
+        hull,
+        Paint()..color = skin.hull.withValues(alpha: blink),
+      );
+      // Contorno na cor de destaque da skin.
+      canvas.drawPath(
+        hull,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..color = skin.accent.withValues(alpha: blink),
+      );
+      for (final s in [-1.0, 1.0]) {
+        canvas.drawPath(
+          Path()
+            ..moveTo(s * 15, 12)
+            ..lineTo(s * 25, 2)
+            ..lineTo(s * 16, 4)
+            ..close(),
+          Paint()..color = skin.wing.withValues(alpha: blink),
+        );
+      }
+    }
 
     canvas.drawCircle(
       Offset.zero,
@@ -427,6 +427,12 @@ class Player extends PositionComponent with HasGameReference<DanmakuGame> {
   }
 
   void _drawWing(Canvas canvas, Offset c, double blink) {
+    canvas.save();
+    canvas.translate(c.dx, c.dy);
+    final drew =
+        sprites.draw(canvas, 'drone_wingman', size: 28, opacity: blink);
+    canvas.restore();
+    if (drew) return;
     canvas.drawCircle(
       c,
       7,
@@ -451,6 +457,12 @@ class Player extends PositionComponent with HasGameReference<DanmakuGame> {
   }
 
   void _drawOption(Canvas canvas, Offset c, double blink) {
+    canvas.save();
+    canvas.translate(c.dx, c.dy);
+    final drew =
+        sprites.draw(canvas, 'option_satellite', size: 24, opacity: blink);
+    canvas.restore();
+    if (drew) return;
     canvas.drawCircle(
       c,
       9,

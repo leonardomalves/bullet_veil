@@ -7,7 +7,30 @@ O Flame é 2D. Nada de GLB entra no jogo: os modelos são renderizados **fora**
 do ciclo de build, de cima para baixo, em folhas de sprites que o jogo blita.
 Rodar isso é manual e raro — só quando a arte muda.
 
-## Pré-requisitos
+> **O pipeline em uso é o de Python puro, sem Blender.** Os modelos são
+> low-poly, sem textura, com material de cor chapada e emissivo — o caso mais
+> simples de rasterização que existe. Um Blender inteiro para resolver isso era
+> peso morto. O caminho com Blender segue documentado adiante como alternativa,
+> mas não é o que roda.
+
+## Como rodar
+
+```bash
+python tool/build_sprites.py .
+```
+
+Lê `art/models/*.glb` e escreve `assets/sprites/*.png` + `*.json`. Leva ~40 s
+para os 21 modelos. Os três scripts:
+
+| Arquivo | Papel |
+|---|---|
+| `tool/glbrender.py` | rasterizador: parser de GLB, z-buffer, sombreamento flat, câmera ortográfica de cima |
+| `tool/build_sprites.py` | percorre o catálogo, une a caixa entre frames, empacota folha + manifesto |
+| `tool/patch_glb_materials.py` | corrige cor de material direto no chunk JSON do GLB |
+
+Dependências: Python 3.10+ e Pillow. Nada além disso.
+
+## Pré-requisitos do caminho alternativo (Blender)
 
 | Ferramenta | Versão | Situação nesta máquina |
 |---|---|---|

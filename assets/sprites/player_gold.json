@@ -1,0 +1,13 @@
+{
+  "name": "player_gold",
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "cols": 1,
+  "rows": 1,
+  "count": 1,
+  "anchor": [
+    0.5,
+    0.5
+  ],
+  "loop": false
+}

@@ -12,10 +12,14 @@ import 'core/missions.dart';
 import 'core/settings.dart';
 import 'core/sfx.dart';
 import 'core/stats.dart';
+import 'game/sprites.dart';
+import 'ui/game_screen.dart';
 import 'ui/hangar_screen.dart';
 import 'ui/title_screen.dart';
 
-/// Atalho de dev para inspecionar telas: `--dart-define=BOOT=hangar`.
+/// Atalho de dev para inspecionar telas sem navegar:
+///   `--dart-define=BOOT=hangar`  abre o hangar
+///   `--dart-define=BOOT=game`    cai direto numa partida (PILOTO)
 const _boot = String.fromEnvironment('BOOT');
 
 Future<void> main() async {
@@ -28,6 +32,7 @@ Future<void> main() async {
   await missions.load();
   await stats.load();
   await daily.load();
+  await sprites.load(); // arte 3D pre-renderizada; ausente = volta ao vetor
   await sfx.init(); // degrada para silêncio se o dispositivo não colaborar
   ads.init(); // sem await: rede não atrasa o boot; sem fill = botões somem
   await SystemChrome.setPreferredOrientations([
@@ -46,7 +51,11 @@ class BulletVeilApp extends StatelessWidget {
     return MaterialApp(
       title: 'Bullet Veil',
       debugShowCheckedModeBanner: false,
-      home: _boot == 'hangar' ? const HangarScreen() : const TitleScreen(),
+      home: switch (_boot) {
+        'hangar' => const HangarScreen(),
+        'game' => const GameScreen(),
+        _ => const TitleScreen(),
+      },
     );
   }
 }

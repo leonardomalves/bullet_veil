@@ -1,0 +1,30 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "bullet_veil-web",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": [
+        "run",
+        "-d",
+        "web-server",
+        "--web-port=8080",
+        "--web-hostname=127.0.0.1"
+      ],
+      "port": 8080
+    },
+    {
+      "name": "bullet_veil-game",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": [
+        "run",
+        "-d",
+        "web-server",
+        "--web-port=8090",
+        "--web-hostname=127.0.0.1",
+        "--dart-define=BOOT=game"
+      ],
+      "port": 8090
+    }
+  ]
+}

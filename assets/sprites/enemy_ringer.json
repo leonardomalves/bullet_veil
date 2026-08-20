@@ -1,0 +1,13 @@
+{
+  "name": "enemy_ringer",
+  "frameWidth": 72,
+  "frameHeight": 72,
+  "cols": 1,
+  "rows": 1,
+  "count": 1,
+  "anchor": [
+    0.5,
+    0.5
+  ],
+  "loop": false
+}

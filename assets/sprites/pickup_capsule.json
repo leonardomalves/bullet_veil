@@ -1,0 +1,13 @@
+{
+  "name": "pickup_capsule",
+  "frameWidth": 40,
+  "frameHeight": 40,
+  "cols": 1,
+  "rows": 1,
+  "count": 1,
+  "anchor": [
+    0.5,
+    0.5
+  ],
+  "loop": false
+}

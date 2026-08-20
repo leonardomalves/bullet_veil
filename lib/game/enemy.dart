@@ -9,6 +9,7 @@ import 'brain.dart';
 import 'danmaku_game.dart';
 import 'difficulty.dart';
 import 'patterns.dart';
+import 'sprites.dart';
 
 /// Como o inimigo se desloca. Separado do padrão de tiro de propósito: a
 /// combinação livre de movimento × padrão multiplica a variedade sem escrever
@@ -200,6 +201,8 @@ class Enemy extends PositionComponent with HasGameReference<DanmakuGame> {
     this.elite = false,
     this.medalCarrier = false,
     this.formationId,
+    this.spriteName,
+    this.spriteSize = 0,
   })  : maxHp = hp,
         super(priority: 5);
 
@@ -223,6 +226,13 @@ class Enemy extends PositionComponent with HasGameReference<DanmakuGame> {
 
   /// Membro de formação: aniquilar o grupo inteiro paga bônus.
   final int? formationId;
+
+  /// Folha renderizada a partir do modelo 3D (ver docs/render-sprites-offline).
+  /// Nula, ou ausente do bundle, e o desenho volta a ser vetorial.
+  final String? spriteName;
+
+  /// Lado do quadrado do sprite, na resolução virtual da arena.
+  final double spriteSize;
 
   double _flash = 0;
   double _spin = 0;
@@ -400,11 +410,58 @@ class Enemy extends PositionComponent with HasGameReference<DanmakuGame> {
       );
     }
 
+    if (_renderSprite(canvas, flashing)) return;
+
     if (isBoss) {
       _renderBoss(canvas, r, base);
     } else {
       _renderShip(canvas, r, base, flashing);
     }
+  }
+
+  /// Desenha o modelo 3D pré-renderizado (ver `docs/render-sprites-offline.md`),
+  /// tingido com a cor de paleta DESTE inimigo — é o que faz um único modelo
+  /// neutro atender aos vários tons em que o mesmo arquétipo aparece.
+  ///
+  /// Devolve `false` quando a folha não está no bundle; aí o vetor assume e o
+  /// jogo continua idêntico ao que sempre foi.
+  bool _renderSprite(Canvas canvas, bool flashing) {
+    final name = spriteName;
+    if (name == null || spriteSize <= 0) return false;
+
+    // O NÚCLEO gira: a folha dele cobre 45° em 12 frames, e o anel tem
+    // simetria de 8, então esse arco já fecha a volta inteira.
+    final sheet = sprites[name];
+    var frame = 0;
+    if (sheet != null && sheet.count > 1) {
+      const arc = math.pi / 4;
+      frame = ((_spin % arc) / arc * sheet.count).floor();
+    }
+
+    // O corredor cruza a tela nos dois sentidos e o modelo tem motor num
+    // extremo só: sem espelhar, metade das aparições voa de ré.
+    final mv = movement;
+    final mirror = mv is SweepAcross && mv.speed < 0;
+    if (mirror) canvas.scale(-1, 1);
+    final ok = sprites.draw(
+      canvas,
+      name,
+      size: spriteSize,
+      frame: frame,
+      tint: flashing ? Colors.white : color,
+      tintMode: flashing ? BlendMode.srcATop : BlendMode.modulate,
+    );
+    if (mirror) canvas.scale(-1, 1);
+    if (!ok) return false;
+
+    // Cabine por cima do sprite: marca o centro real da colisão, e precisa
+    // ser constante em qualquer escala — por isso nunca foi para o modelo.
+    canvas.drawCircle(
+      Offset(0, isBoss ? 0 : -radius * 0.05),
+      radius * (isBoss ? 0.22 : 0.26),
+      Paint()..color = flashing ? color : Colors.white.withValues(alpha: 0.92),
+    );
+    return true;
   }
 
   /// Caça inimigo apontado para BAIXO (na direção do jogador). O núcleo claro
@@ -590,6 +647,8 @@ class EnemyFactory {
         pattern: AimedFanPattern(count: 1, interval: 2.0, speed: 190),
         movement: DiveHoverLeave(stopY: 190, hover: 2.0, drift: 55),
         scoreValue: 140,
+        spriteName: 'enemy_grunt',
+        spriteSize: 52,
       );
 
   Enemy grunt(double x, {int colorIndex = 2}) => Enemy(
@@ -604,6 +663,8 @@ class EnemyFactory {
         ),
         movement: DiveHoverLeave(stopY: 210, hover: 2.4, drift: 70),
         scoreValue: 180,
+        spriteName: 'enemy_grunt',
+        spriteSize: 52,
       );
 
   /// Metralhador: rajadas retas miradas no jogador. (Antes era espiral —
@@ -622,6 +683,8 @@ class EnemyFactory {
         ),
         movement: DiveHoverLeave(stopY: 260, hover: 4.5, drift: 110),
         scoreValue: 420,
+        spriteName: 'enemy_spinner',
+        spriteSize: 64,
       );
 
   /// Canhoneiro: colunas retas de tiros para baixo. (Antes era anel.)
@@ -638,6 +701,8 @@ class EnemyFactory {
         ),
         movement: DiveHoverLeave(stopY: 300, hover: 5.5),
         scoreValue: 560,
+        spriteName: 'enemy_ringer',
+        spriteSize: 72,
       );
 
   Enemy runner(double y, bool fromLeft, {int colorIndex = 5}) => Enemy(
@@ -655,6 +720,8 @@ class EnemyFactory {
           bobAmplitude: 45,
         ),
         scoreValue: 300,
+        spriteName: 'enemy_runner',
+        spriteSize: 48,
       );
 
   /// Encouraçado: muito HP, grande, fica em cena despejando anel + leque
@@ -676,6 +743,8 @@ class EnemyFactory {
         ]),
         movement: DiveHoverLeave(stopY: 230, hover: 8, drift: 45),
         scoreValue: 1200,
+        spriteName: 'enemy_heavy',
+        spriteSize: 84,
       );
 
   /// Sniper: fica no alto, telegrafa uma linha e dispara dardos nela.
@@ -688,6 +757,8 @@ class EnemyFactory {
         role: EnemyRole.sniper,
         movement: DiveHoverLeave(stopY: 170, hover: 9, drift: 30, speed: 240),
         scoreValue: 520,
+        spriteName: 'enemy_sniper',
+        spriteSize: 52,
       );
 
   /// Kamikaze: barato, rápido, explode em cima de quem dorme no ponto.
@@ -699,6 +770,8 @@ class EnemyFactory {
         color: bulletColors[0],
         movement: KamikazeDive(),
         scoreValue: 240,
+        spriteName: 'enemy_kamikaze',
+        spriteSize: 44,
       );
 
   /// Cargueiro: lento, gordo, SEM tiro — uma piñata de medalhas atravessando
@@ -711,6 +784,8 @@ class EnemyFactory {
         medalCarrier: true,
         movement: SweepAcross(speed: fromLeft ? 72 : -72, bobAmplitude: 18),
         scoreValue: 900,
+        spriteName: 'enemy_freighter',
+        spriteSize: 80,
       );
 
   /// Mid-boss (ELITE): o pedágio do meio do estágio. Sem fases, mas grosso o
@@ -733,6 +808,8 @@ class EnemyFactory {
         ]),
         movement: DiveHoverLeave(stopY: 250, hover: 14, drift: 120),
         scoreValue: 2600 + stage * 400,
+        spriteName: 'enemy_elite',
+        spriteSize: 104,
       );
 
   /// Formação em V de 5 naves. Aniquilar TODAS antes de alguma fugir paga
@@ -756,6 +833,8 @@ class EnemyFactory {
           drift: 40,
         ),
         scoreValue: 160,
+        spriteName: 'enemy_grunt',
+        spriteSize: 52,
       ));
     }
     return out;
@@ -779,6 +858,11 @@ class EnemyFactory {
       BossType.mantis => 52.0,
       BossType.core => 58.0,
     };
+    final sprite = switch (type) {
+      BossType.dreadnought => ('boss_dreadnought', 180.0),
+      BossType.mantis => ('boss_mantis', 164.0),
+      BossType.core => ('boss_core', 148.0),
+    };
     return Enemy(
       position: Vector2(kArenaWidth / 2, -140),
       hp: hp,
@@ -790,6 +874,8 @@ class EnemyFactory {
       pattern: phases.first.pattern,
       phases: phases,
       movement: BossHold(stopY: 250, sway: type == BossType.mantis ? 210 : 150),
+      spriteName: sprite.$1,
+      spriteSize: sprite.$2,
     );
   }
 

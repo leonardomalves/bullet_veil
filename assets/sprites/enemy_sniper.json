@@ -1,0 +1,13 @@
+{
+  "name": "enemy_sniper",
+  "frameWidth": 52,
+  "frameHeight": 52,
+  "cols": 1,
+  "rows": 1,
+  "count": 1,
+  "anchor": [
+    0.5,
+    0.5
+  ],
+  "loop": false
+}
